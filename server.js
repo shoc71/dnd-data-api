@@ -6,29 +6,24 @@ import fs from "fs/promises";
 import { fileURLToPath } from "url";
 import JSZip from "jszip";
 
+import v1RouterRaw from './api/v1/raw.js' 
+import { PORT, DATA_DIR } from "./config/constants.js";
+
 const app = express();
 app.use(express.json());
 app.use(cors());
 dotenv.config();
 
+// TODO ss - checksum for json-data files and display the latest one
+// TODO ss - request to client to make sure they have the latest version
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename); // this
 
-const PORT = process.env.PORT || 3001;
-
-const API_VERSION = process.env.API_VERSION;
-const DATA_DIR = process.env.DATA_FOLDER;
-const API_FILEPATH = API_VERSION + DATA_DIR;
+const API_FILEPATH = DATA_DIR;
 
 // send raw file
-app.get(API_FILEPATH + '/raw', async(req, res) => {
-    const filePath = path.join(__dirname, DATA_DIR, 'actions.json');
-  
-    // Directly stream the file contents over HTTP
-    res.sendFile(filePath, (err) => {
-        if (err) res.status(404).json({ error: "File not found" });
-    });
-})
+app.use(API_FILEPATH, v1RouterRaw);
 
 // send edited file
 app.get(API_FILEPATH + '/edited', async(req, res) => {
